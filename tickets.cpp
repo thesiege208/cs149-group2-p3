@@ -51,6 +51,20 @@ bool soldOut()
     pthread_mutex_unlock(&seatsMutex);
     return result;
 }
+void sellTicket(buyer,seller)
+{
+//  get ticket						// code to get ticket
+//  if(ticket != NULL){					// if ticket exists
+//	int waitT = 0;					// set wait time
+//      if(type=='H') waitT = (rand() % 2) + 1;		// 1-2 minutes
+//      if(type=='M') waitT = (rand() % 3) + 2;		// 2-4 minutes
+//      if(type=='L') waitT = (rand() % 4) + 4;      	// 4-7 minutes
+//        sleep(waitT);					// wait for x amount of time
+//        pthread_mutex_lock(&mutex);
+//        pthread_cond_signal(&cond);			// unblock thread
+//        pthread_mutex_unlock(&mutex);
+    }
+}
 
 /* start routine which hanndles all transactions and printing 
  * where arg seller_type is either H, M or L

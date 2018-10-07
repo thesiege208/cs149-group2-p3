@@ -46,9 +46,9 @@ pthread_mutex_t LQmutex = PTHREAD_MUTEX_INITIALIZER;	// Low Sellers Queue mutex
 
 bool soldOut()
 {
-    pthread_mutex_lock(seatsMutex);
+    pthread_mutex_lock(&seatsMutex);
     bool result = (availableSeats == 0);
-    pthread_mutex_unlock(seatsMutex);
+    pthread_mutex_unlock(&seatsMutex);
     return result;
 }
 
@@ -79,9 +79,9 @@ void * sell(char *seller_type) {
             		break;
     	}
     	// while(true) {
-        //	pthread_mutex_lock(mutex);
-        //	pthread_cond_wait(cond, mutex);	// Block thread on condition variable
-        //	pthread_mutex_unlock(mutex);
+        //	pthread_mutex_lock(&mutex);
+        //	pthread_cond_wait(&cond, &mutex);	// Block thread on condition variable
+        //	pthread_mutex_unlock(&mutex);
         //	if (soldOut()) { break;	}	// break if no more seats available
         //	get next buyer			// code to get next buyer from queue
         //	while (buyer != NULL)		// while buyer exists
@@ -103,15 +103,15 @@ void wakeup_all_seller_threads() {
     // ROGER
     // dealing with mutex lock/unlock and cond broadcast stuff
     // sorry i can't help you much here :(
-	pthread_mutex_lock(HQmutex);	// High price seller queue
-    	pthread_cond_broadcast(HQcond);
-    	pthread_mutex_unlock(HQmutex);
-	pthread_mutex_lock(MQmutex);	// Mid price sellers queue
-    	pthread_cond_broadcast(MQcond);
-    	pthread_mutex_unlock(MQmutex);
-	pthread_mutex_lock(LQmutex);	// Low price sellers queue
-    	pthread_cond_broadcast(LQcond);
-    	pthread_mutex_unlock(LQmutex);
+	pthread_mutex_lock(&HQmutex);	// High price seller queue
+    	pthread_cond_broadcast(&HQcond);
+    	pthread_mutex_unlock(&HQmutex);
+	pthread_mutex_lock(&MQmutex);	// Mid price sellers queue
+    	pthread_cond_broadcast(&MQcond);
+    	pthread_mutex_unlock(&MQmutex);
+	pthread_mutex_lock(&LQmutex);	// Low price sellers queue
+    	pthread_cond_broadcast(&LQcond);
+    	pthread_mutex_unlock(&LQmutex);
 }
 
 /* where arg N is the command line option for # of customers per queue */

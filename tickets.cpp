@@ -6,6 +6,7 @@
  */
 
 #include <iostream>
+#include <ctime>
 #include <cstdlib>
 #include <queue>
 #include <string>
@@ -30,9 +31,6 @@ map<int, string> seats; /* map holding all the sold seats */
  * will be initialized in respective thread.
  */
 priority_queue<int> h1, m1, m2, m3, l1, l2, l3, l4, l5, l6;
-
-pthread_cond_t cond = PTHREAD_COND_INITIALIZER;		// Placeholder
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;	// Placeholder
 
 pthread_mutex_t seatsMutex = PTHREAD_MUTEX_INITIALIZER;	// Seats
 pthread_mutex_t buyersMutex = PTHREAD_MUTEX_INITIALIZER;// Buyers mutex
@@ -148,6 +146,19 @@ void * sell(char *seller_type) {
     // remember to give customer names based on seller and place in queue
     // remember to print 10x10 seating chart after each ticket sale
     // remember to update tracking vars/arrays
+    
+    /* some useful map functions:
+     * to add a key-value pair: 
+     *     seats.insert({<seat #, cust name>});
+     * OR  seats.emplace(<seat #, cust name>);
+     * to get the value at a specific key:
+     *     string custName = seats.at(<seat #>);
+     * to iterate through the map:
+     *     iterator it = seats.begin(); <-- sets iterator to first element
+     *     iterator it = seats.end(); <-- sets iterator to last element
+     *     for (iterator it = seats.begin(); it != seats.end(); ++it) {}
+     */
+    
 	switch(seller_type) {	// Determine which mutex and condition to use
         	case 'H': //high priority
             		mutex = HQmutex;
@@ -188,8 +199,6 @@ void * sell(char *seller_type) {
 /* function which wakes up threads from suspension to execute in parallel */
 void wakeup_all_seller_threads() {
     // ROGER
-    // dealing with mutex lock/unlock and cond broadcast stuff
-    // sorry i can't help you much here :(
 	pthread_mutex_lock(&HQmutex);	// High price seller queue
     	pthread_cond_broadcast(&HQcond);
     	pthread_mutex_unlock(&HQmutex);
@@ -204,11 +213,6 @@ void wakeup_all_seller_threads() {
 /* where arg N is the command line option for # of customers per queue */
 int main() {
     // SIJING
-    // An Outline (also refer to p3 preview)
-    // 1. init pthreads and suspend
-    // 2. prompt command line input for N (5, 10, 15)
-    // 3. loop through threads, init queues, init random N arrival times per pq
-    // 4. wake up threads to execute in parallel (define new funct for this)
     // 5. exit after all threads complete
     int n;
     pthread_t tids[10];
@@ -235,8 +239,26 @@ int main() {
     }
 
 	// init pqs with n rand customers
+	priority_queue<int> *qlist[10];
+	qlist[0] = &h1;
+	qlist[1] = &m1;
+	qlist[2] = &m2;
+	qlist[3] = &m3;
+	qlist[4] = &l1;
+	qlist[5] = &l2;
+	qlist[6] = &l3;
+	qlist[7] = &l4;
+	qlist[8] = &l5;
+	qlist[9] = &l6;
+	srand((unsigned) time(0));
+	for (int i = 0; i < 10; i++) {
+	    for (int j = 0; j < n; j++) {
+	        int r = rand() % 59;
+	        *qlist[i].push(r);
+	    }
+	}
 	
-	// wakeup_all_seller_threads()
+	wakeup_all_seller_threads()
 
     // after all threads complete execution, join back into main thread
     // for (int i = 0 ; i < 10 ; i++) {

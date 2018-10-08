@@ -35,7 +35,7 @@ pthread_cond_t cond = PTHREAD_COND_INITIALIZER;		// Placeholder
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;	// Placeholder
 
 pthread_mutex_t seatsMutex = PTHREAD_MUTEX_INITIALIZER;	// Seats
-pthread_mutex_t buyersMutex = PTHREAD_MUTEX_INITIALIZER;// Buyers mutex - delete if we dont need
+pthread_mutex_t buyersMutex = PTHREAD_MUTEX_INITIALIZER;// Buyers mutex
 
 pthread_cond_t HQcond = PTHREAD_COND_INITIALIZER;	// High Seller Queue condition
 pthread_mutex_t HQmutex = PTHREAD_MUTEX_INITIALIZER;	// High Seller Queue mutex
@@ -51,20 +51,90 @@ bool soldOut()
     pthread_mutex_unlock(&seatsMutex);
     return result;
 }
-void sellTicket(buyer,seller)
+
+/*
+// Use or delete anything that you think will help. 
+// These might work if we create some new classes or objects
+// But dont use it if it doesnt look right. I'm just adding suggestions.
+void sellTicket(buyer*, seller*)
 {
-//  get ticket						// code to get ticket
-//  if(ticket != NULL){					// if ticket exists
-//	int waitT = 0;					// set wait time
-//      if(type=='H') waitT = (rand() % 2) + 1;		// 1-2 minutes
-//      if(type=='M') waitT = (rand() % 3) + 2;		// 2-4 minutes
-//      if(type=='L') waitT = (rand() % 4) + 4;      	// 4-7 minutes
-//        sleep(waitT);					// wait for x amount of time
-//        pthread_mutex_lock(&mutex);
-//        pthread_cond_signal(&cond);			// unblock thread
-//        pthread_mutex_unlock(&mutex);
+    getTicket(buyer, seller)				// code to get ticket
+    if(ticket != NULL){					// if ticket exists
+	int waitT = 0;					// set wait time
+        if(sellerType=='H') waitT = (rand() % 2) + 1;		// 1-2 minutes
+        if(sellerType=='M') waitT = (rand() % 3) + 2;		// 2-4 minutes
+        if(sellerType=='L') waitT = (rand() % 4) + 4;      	// 4-7 minutes
+        sleep(waitT);					// wait for x amount of time
+        pthread_mutex_lock(&mutex);
+        pthread_cond_signal(&cond);			// unblock thread
+        pthread_mutex_unlock(&mutex);
     }
 }
+
+Ticket* getTicket(buyer*, seller*)	// Depending on if we make a ticket object or something
+{
+    char str[10];
+    ticket=NULL;
+    pthread_mutex_lock(&seatsMutex);
+    if(availableSeats != 0) {
+        if (sellerType == 'H') { 	// high priority
+            // do something
+        }
+        if (sellerType == 'M') {	// medium priority
+            // do something
+        }
+        if (sellerType == 'L') {	// low priority
+	    // do something
+        }
+        if(ticket != NULL) {
+            // something else
+        }
+    }
+    pthread_mutex_unlock(&seatsMutex);
+    return ticket;
+}
+
+Buyer* nextBuyer(char buyerType)			// Depending on if we create some class or object for buyers.
+{							// Idk if this is a good or bad idea. Maybe Im making it complicated.
+    buyer = NULL;
+    switch(buyerType){
+        case 'H':					// high priority
+            pthread_mutex_lock(&HQmutex);
+            if(queueH.size() > 0){			// assuming we create a queue of buyers
+                buyer = queueH.front();			// get next buyer
+                queueH.pop_front();			// delete buyer from queue
+                pthread_mutex_lock(&buyersMutex);
+                // insert code				// do whatever necessary
+                pthread_mutex_unlock(&buyersMutex);
+            }
+            pthread_mutex_unlock(&HQmutex);
+            break;
+        case 'M':					// medium priority
+            pthread_mutex_lock(&MQmutex);
+            if(queueM.size() > 0){
+                buyer = queueM.front();
+                queueM.pop_front();
+                pthread_mutex_lock(&buyersMutex);
+                // insert code
+                pthread_mutex_unlock(&buyersMutex);
+            }
+            pthread_mutex_unlock(&MQmutex);
+            break;
+        case 'L':					// low priority
+            pthread_mutex_lock(&LQmutex);
+            if(queueL.size() > 0){
+                buyer = queueL.front();
+                queueL.pop_front();
+                pthread_mutex_lock(&buyersMutex);
+                // insert code
+                pthread_mutex_unlock(&buyersMutex);
+            }
+            pthread_mutex_unlock(&LQmutex);
+            break;
+    }
+    return buyer;
+}
+*/
 
 /* start routine which hanndles all transactions and printing 
  * where arg seller_type is either H, M or L
@@ -92,23 +162,26 @@ void * sell(char *seller_type) {
             		waitCond = LQcond;
             		break;
     	}
-    	// while(true) {
-        //	pthread_mutex_lock(&mutex);
-        //	pthread_cond_wait(&cond, &mutex);	// Block thread on condition variable
-        //	pthread_mutex_unlock(&mutex);
-        //	if (soldOut()) { break;	}	// break if no more seats available
-        //	get next buyer			// code to get next buyer from queue
-        //	while (buyer != NULL)		// while buyer exists
-        //	{
-        //    		count++;		// increment sold count
-        //    		sell ticket		// code to sell ticket
-        //    		if(count!=10)		// while seller not sold out
-        //      		get next buyer	// code to get next buyer
-	//	}
-        //	if(soldOut()) { break; }	// break if no more seats available
-        //	else if(count==10){ break; }	// else break if seller is sold out
-    	// }
-    	// pthread_cancel(this thread ID);	// close this seller's thread
+	/*
+	// sample code, dont use if it doesnt help.
+    	while(true) {
+        	pthread_mutex_lock(&mutex);
+        	pthread_cond_wait(&cond, &mutex);	// Block thread on condition variable
+        	pthread_mutex_unlock(&mutex);
+        	if (soldOut()) { break;	}	// break if no more seats available
+        	buyer = nextBuyer(char buyerType) // code to get next buyer from queue
+        	while (buyer != NULL)		// while buyer exists
+        	{
+            		count++;		// increment sold count
+            		sellTicket(buyer*, seller*)		// code to sell ticket
+            		if(count!=10)		// while seller not sold out
+              		get next buyer	// code to get next buyer
+		}
+        	if(soldOut()) { break; }	// break if no more seats available
+        	else if(count==10){ break; }	// else break if seller is sold out
+    	}
+    	pthread_cancel(this thread ID);	// close this seller's thread
+	*/
     	return NULL;
 }
 

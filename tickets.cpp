@@ -158,7 +158,7 @@ void * sell(char *seller_type) {
      *     iterator it = seats.end(); <-- sets iterator to last element
      *     for (iterator it = seats.begin(); it != seats.end(); ++it) {}
      */
-    
+    	/*
 	switch(seller_type) {	// Determine which mutex and condition to use
         	case 'H': //high priority
             		mutex = HQmutex;
@@ -169,11 +169,11 @@ void * sell(char *seller_type) {
             		cond = MQcond;
             		break;
         	case 'L':  //low priority
-            		waitMutex = LQmutex;
-            		waitCond = LQcond;
+            		mutex = LQmutex;
+            		cond = LQcond;
             		break;
     	}
-	/*
+	
 	// sample code, dont use if it doesnt help.
     	while(true) {
         	pthread_mutex_lock(&mutex);

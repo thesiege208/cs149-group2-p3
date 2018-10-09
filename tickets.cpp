@@ -176,7 +176,7 @@ void *eachSeller(void *sellerId) {
             // This customer has already arrived, lock the seat and assign to this customer
             pthread_mutex_lock(&mutex);
             // Assign seats to customers
-            cout << "\n@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << sellerName << '_' << currentCustomer.getCID() << " HAS ARRIVED." << endl;
+            cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << sellerName << '_' << currentCustomer.getCID() << " HAS ARRIVED." << endl;
             stillHasSeat = assignSeats(sellerName, currentCustomer);
             if (stillHasSeat == false) {
                 // No more empty seats
@@ -210,6 +210,7 @@ int main() {
     // prompting command line input
     cout << "\nEnter the number of customers per queue (5, 10, or 15): ";
     cin >> N;
+    cout << "\n";
     
     pthread_mutex_init(&mutex, NULL);
 

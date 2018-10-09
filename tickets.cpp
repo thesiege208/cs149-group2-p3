@@ -46,8 +46,6 @@ string seat[10][10]; /* 2D array containing all 100 seats */
 int N; /* command line input deciding # customers per queue */
 
 pthread_mutex_t mutex;
-pthread_cond_t cond;
-
 
 bool assignLowSeat(string seatId) {
     for (int i = 0; i < 10; i++){
@@ -152,14 +150,12 @@ priority_queue<Customer, vector<Customer>, Compare> generateRandomCustomerQueue(
         int c = rand() % (max - min + 1) + min;
         Customer cust = Customer(i + 1, a, c);
         customerQueue.push(cust);
-        cout << sellerName << '_' << cust.getCID() << " HAS ARRIVED @" << cust.getAT() << " MIN" << endl;
     }
     return customerQueue;
 }
 
 void *eachSeller(void *sellerId) {
     string sellerName = mapSellerIdToName((long) sellerId);
-    //cout << "SELLER " << sellerName << endl;
 
     // Generate random customer queue for this seller.
     // seller is the name of this seller, for example, "L1", so seller[0] is the type of seller, for example, 'L'.
@@ -171,17 +167,22 @@ void *eachSeller(void *sellerId) {
     while (currentTimeStamp < 60 && !cQ.empty()) {
         Customer currentCustomer = cQ.top();
         if (currentCustomer.getAT() > currentTimeStamp) {
-            // The customer hasn’t arrived yet, wait until they arrives
+            // The customer hasn’t arrived yet, wait until they arrive
             int waitTime = currentCustomer.getAT() - currentTimeStamp;
             currentTimeStamp += waitTime; // get the complete time stamp
             sleep(waitTime);
         } else {
             // This customer has already arrived, lock the seat and assign to this customer
             pthread_mutex_lock(&mutex);
-             // Assign seats to customers
+            // Assign seats to customers
+            cout << sellerName << '_' << currentCustomer.getCID() << " HAS ARRIVED @ " << currentCustomer.getAT() << " MIN." << endl;
             stillHasSeat = assignSeats(sellerName, currentCustomer);
             if (stillHasSeat == false) {
                 // No more empty seats
+                cout << "SEATS ARE FULL." << endl;
+                cQ.pop();
+                cout << sellerName << "_" << currentCustomer.getCID() << " HAS LEFT." << endl;
+                currentTimeStamp = 100;
                 break;
             }
 
@@ -190,12 +191,14 @@ void *eachSeller(void *sellerId) {
             
             //keep working for the customer with complete time 
             currentTimeStamp = currentTimeStamp + currentCustomer.getCT(); 
-            cout << "SEAT BOOKED BY " << sellerName << "_" << currentCustomer.getCID() << ", TRANSACTION COMPLETED @ " << currentTimeStamp << " MIN\n";
-            cQ.pop(); //remove customer who complete purchase
-            sleep(currentCustomer.getCT()); // actual working for completeTime
+            cout << "SEAT BOOKED BY " << sellerName << "_" << currentCustomer.getCID() << ", TRANSACTION COMPLETED @ " << currentTimeStamp << " MIN.\n";
+            cQ.pop(); // remove customer who complete purchase
+            cout << sellerName << "_" << currentCustomer.getCID() << " HAS LEFT." << endl;
+            sleep(currentCustomer.getCT()); // actually completing
         }
     }
-    pthread_exit(NULL);
+    pthread_cancel(pthread_self());
+    return NULL;
 }
 
 
@@ -204,12 +207,14 @@ int main() {
     pthread_t threads[numberOfSellers];
     
     // prompting command line input
-    printf("\nEnter the number of customers per queue (5, 10, or 15): "); 
+    cout << "\nEnter the number of customers per queue (5, 10, or 15): ";
     cin >> N;
+    
+    pthread_mutex_init(&mutex, NULL);
 
     for (int i = 0; i < numberOfSellers; i++) {
         int sellerId = i;
-        pthread_create(&threads[i], NULL, eachSeller,  (void*) sellerId);
+        pthread_create(&threads[i], NULL, eachSeller,  reinterpret_cast<void*>(sellerId));
     }
 
     for (int i = 0; i < numberOfSellers; i++) {
@@ -219,5 +224,4 @@ int main() {
     printTable();
     exit(0);
 }
-
 

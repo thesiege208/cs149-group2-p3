@@ -22,20 +22,25 @@ class Customer {
     int arrivalTime;
     int completeTime;
 
+    public:
     Customer(int cId, int aTime, int cTime) {
         customerId = cId;
         arrivalTime = aTime;
         completeTime = cTime;
     }
-}
+    
+    int getCID() { return customerId; }
+    int getAT() { return arrivalTime; }
+    int getCT() { return completeTime; }
+};
 
 class Compare {
     public:
         bool operator() (Customer a, Customer b) {
-            if (a.aTime < b.aTime) { return true;}
+            if (a.getAT() > b.getAT()) { return true;}
             return false;
         }
-}
+};
 
 string seat[10][10]; /* 2D array containing all 100 seats */
 int N; /* command line input deciding # customers per queue */
@@ -89,7 +94,7 @@ bool assignHighSeat(string seatId) {
 // also handle 'M' and 'H'.
 bool assignSeats(string seller, Customer customer) {
     char sellerType = seller[0];
-    string assignedSeatId = seller  + '_' + to_string(customer.customerId);
+    string assignedSeatId = seller  + '_' + to_string(customer.getCID());
     if (sellerType == 'L') {
         return assignLowSeat(assignedSeatId);
     } else if (sellerType == 'M') {
@@ -101,16 +106,16 @@ bool assignSeats(string seller, Customer customer) {
 
 void printTable() {
      int k = 0;
-     cout<<"-----------SEATING CHART-----------\n";
-     for (int i = 0; i < 10; i++){
-         for (int j = 0; j < 10; j++){
+     cout << "\n---------------------SEATING CHART---------------------\n";
+     for (int i = 0; i < 10; i++) {
+         for (int j = 0; j < 10; j++) {
              if (seat[i][j].empty() == false) {
-               cout << seat[i][j]<<"\t";
+               cout << seat[i][j] << "\t";
              } else {
-                cout << "0" << "\t";
+                cout << "-" << "\t";
              }
          }
-         cout<<"\n";
+         cout << "\n";
          continue;
      }
 }
@@ -126,9 +131,9 @@ string mapSellerIdToName(long sellerId) {
     }
 }
 
-queue<Customer> generateRandomCustomerQueue(char sellerType) {
+priority_queue<Customer, vector<Customer>, Compare> generateRandomCustomerQueue(string sellerName) {
     priority_queue<Customer, vector<Customer>, Compare> customerQueue;
-    
+    char sellerType = sellerName[0];
     srand((unsigned) time(0));
     for (int i = 0; i < N; i++) {
         int a = rand() % 59;
@@ -147,26 +152,27 @@ queue<Customer> generateRandomCustomerQueue(char sellerType) {
         int c = rand() % (max - min + 1) + min;
         Customer cust = Customer(i + 1, a, c);
         customerQueue.push(cust);
+        cout << sellerName << '_' << cust.getCID() << " HAS ARRIVED @" << cust.getAT() << " MIN" << endl;
     }
     return customerQueue;
 }
 
 void *eachSeller(void *sellerId) {
     string sellerName = mapSellerIdToName((long) sellerId);
+    //cout << "SELLER " << sellerName << endl;
 
-    cout << "SELLER " << sellerName << endl;
     // Generate random customer queue for this seller.
     // seller is the name of this seller, for example, "L1", so seller[0] is the type of seller, for example, 'L'.
     char sellerType = sellerName[0];
-    queue<Customer> cQ = generateRandomCustomerQueue(sellerType); 
+    priority_queue<Customer, vector<Customer>, Compare> cQ = generateRandomCustomerQueue(sellerName); 
 
     int currentTimeStamp = 0;
     bool stillHasSeat = true;
     while (currentTimeStamp < 60 && !cQ.empty()) {
-        Customer currentCustomer = cQ.front();
-        if (currentCustomer.arrivalTime > currentTimeStamp) {
+        Customer currentCustomer = cQ.top();
+        if (currentCustomer.getAT() > currentTimeStamp) {
             // The customer hasn’t arrived yet, wait until they arrives
-            int waitTime = currentCustomer.arrivalTime - currentTimeStamp;
+            int waitTime = currentCustomer.getAT() - currentTimeStamp;
             currentTimeStamp += waitTime; // get the complete time stamp
             sleep(waitTime);
         } else {
@@ -178,16 +184,15 @@ void *eachSeller(void *sellerId) {
                 // No more empty seats
                 break;
             }
-            // Print the current table, for debugging only.
-            // printTable();
+
             // Unlock the table since this seller already book the seat for the customer
             pthread_mutex_unlock(&mutex);
             
             //keep working for the customer with complete time 
-            currentTimeStamp = currentTimeStamp + currentCustomer.completeTime; 
-            cout << "SEAT BOOKED, TRANSACTION COMPLETED IN " << currentTimeStamp << " MIN\n";
+            currentTimeStamp = currentTimeStamp + currentCustomer.getCT(); 
+            cout << "SEAT BOOKED BY " << sellerName << "_" << currentCustomer.getCID() << ", TRANSACTION COMPLETED @ " << currentTimeStamp << " MIN\n";
             cQ.pop(); //remove customer who complete purchase
-            sleep(currentCustomer.completeTime); // actual working for completeTime
+            sleep(currentCustomer.getCT()); // actual working for completeTime
         }
     }
     pthread_exit(NULL);
@@ -200,7 +205,7 @@ int main() {
     
     // prompting command line input
     printf("\nEnter the number of customers per queue (5, 10, or 15): "); 
-    scanf("%d", N);
+    cin >> N;
 
     for (int i = 0; i < numberOfSellers; i++) {
         int sellerId = i;
@@ -210,6 +215,9 @@ int main() {
     for (int i = 0; i < numberOfSellers; i++) {
         pthread_join(threads[i], 0);
     }
+    
+    printTable();
+    exit(0);
 }
 
 

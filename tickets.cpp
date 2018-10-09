@@ -6,6 +6,7 @@
  */
 
 #include <iostream>
+#include <iomanip>
 #include <cstdlib>
 #include <queue>
 #include <string>
@@ -110,7 +111,7 @@ void printTable() {
              if (seat[i][j].empty() == false) {
                cout << seat[i][j] << "\t";
              } else {
-                cout << "-" << "\t";
+                cout << "-\t\t";
              }
          }
          cout << "\n";
@@ -175,13 +176,13 @@ void *eachSeller(void *sellerId) {
             // This customer has already arrived, lock the seat and assign to this customer
             pthread_mutex_lock(&mutex);
             // Assign seats to customers
-            cout << sellerName << '_' << currentCustomer.getCID() << " HAS ARRIVED @ " << currentCustomer.getAT() << " MIN." << endl;
+            cout << "\n@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << sellerName << '_' << currentCustomer.getCID() << " HAS ARRIVED." << endl;
             stillHasSeat = assignSeats(sellerName, currentCustomer);
             if (stillHasSeat == false) {
                 // No more empty seats
-                cout << "SEATS ARE FULL." << endl;
+                cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << "SEATS ARE FULL." << endl;
                 cQ.pop();
-                cout << sellerName << "_" << currentCustomer.getCID() << " HAS LEFT." << endl;
+                cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << sellerName << "_" << currentCustomer.getCID() << " HAS LEFT.\n" << endl;
                 currentTimeStamp = 100;
                 break;
             }
@@ -191,9 +192,9 @@ void *eachSeller(void *sellerId) {
             
             //keep working for the customer with complete time 
             currentTimeStamp = currentTimeStamp + currentCustomer.getCT(); 
-            cout << "SEAT BOOKED BY " << sellerName << "_" << currentCustomer.getCID() << ", TRANSACTION COMPLETED @ " << currentTimeStamp << " MIN.\n";
+            cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << "SEAT BOOKED BY " << sellerName << "_" << currentCustomer.getCID() << "." << endl;
             cQ.pop(); // remove customer who complete purchase
-            cout << sellerName << "_" << currentCustomer.getCID() << " HAS LEFT." << endl;
+            cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << sellerName << "_" << currentCustomer.getCID() << " HAS LEFT.\n" << endl;
             sleep(currentCustomer.getCT()); // actually completing
         }
     }
@@ -218,7 +219,7 @@ int main() {
     }
 
     for (int i = 0; i < numberOfSellers; i++) {
-        pthread_join(threads[i], 0);
+        pthread_join(threads[i], NULL);
     }
     
     printTable();

@@ -75,6 +75,20 @@ bool assignMiddleSeat(string seatId) {
                 }
             }
         }
+    /*
+    int middleRow = 5;
+    for (int rowOffSet = 0; middleRow - rowOffSet >= 0 && middleRow + rowOffSet < 10; rowOffSet ++) {
+        int k = -1
+        int i = middleRow + k * rowOffSet;
+        for (int j = 0; j < 10; j++){
+              if ( seat[i][j] == "" ) {
+                   seat[i][j] = seatId;
+                   return true;
+              }
+         }
+         k *= -1
+    }
+    */
     return false; 
 }
 

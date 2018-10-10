@@ -46,6 +46,8 @@ class Compare {
 string seat[10][10]; /* 2D array containing all 100 seats */
 int N; /* command line input deciding # customers per queue */
 
+pthread_mutex_t mutex;
+
 bool assignLowSeat(string seatId) {
     for (int i = 0; i < 10; i++){
             for (int j = 0; j < 10; j++){
@@ -171,8 +173,9 @@ void *eachSeller(void *sellerId) {
             currentTimeStamp += waitTime; // get the complete time stamp
             sleep(waitTime);
         } else {
-            // This customer has already arrived
-            // Assign seat to customer
+            // This customer has already arrived, lock the seat and assign to this customer
+            pthread_mutex_lock(&mutex);
+            // Assign seats to customers
             cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << sellerName << '_' << currentCustomer.getCID() << " HAS ARRIVED." << endl;
             stillHasSeat = assignSeats(sellerName, currentCustomer);
             if (stillHasSeat == false) {
@@ -183,8 +186,11 @@ void *eachSeller(void *sellerId) {
                 currentTimeStamp = 100;
                 break;
             }
+
+            // Unlock the table since this seller already book the seat for the customer
+            pthread_mutex_unlock(&mutex);
             
-            // keep working for the customer with complete time 
+            //keep working for the customer with complete time 
             currentTimeStamp = currentTimeStamp + currentCustomer.getCT(); 
             cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << "SEAT BOOKED BY " << sellerName << "_" << currentCustomer.getCID() << "." << endl;
             cQ.pop(); // remove customer who complete purchase
@@ -196,6 +202,7 @@ void *eachSeller(void *sellerId) {
     return NULL;
 }
 
+
 /* where arg N is the command line option for # of customers per queue */
 int main() {
     pthread_t threads[numberOfSellers];
@@ -204,12 +211,14 @@ int main() {
     cout << "\nEnter the number of customers per queue (5, 10, or 15): ";
     cin >> N;
     cout << "\n";
+    
+    pthread_mutex_init(&mutex, NULL);
 
     for (int i = 0; i < numberOfSellers; i++) {
         int sellerId = i;
         pthread_create(&threads[i], NULL, eachSeller,  reinterpret_cast<void*>(sellerId));
     }
-    
+
     for (int i = 0; i < numberOfSellers; i++) {
         pthread_join(threads[i], NULL);
     }

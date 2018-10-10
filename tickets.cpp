@@ -46,7 +46,9 @@ class Compare {
 string seat[10][10]; /* 2D array containing all 100 seats */
 int N; /* command line input deciding # customers per queue */
 
-pthread_mutex_t mutex;
+pthread_cond_t cond = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t seatMutex = PTHREAD_MUTEX_INITIALIZER;
 
 bool assignLowSeat(string seatId) {
     for (int i = 0; i < 10; i++){
@@ -174,7 +176,8 @@ void *eachSeller(void *sellerId) {
             sleep(waitTime);
         } else {
             // This customer has already arrived, lock the seat and assign to this customer
-            pthread_mutex_lock(&mutex);
+            pthread_mutex_lock(&seatMutex);
+            pthread_cond_wait(&cond, &seatMutex);   // wait for wakeup cond broadcast
             // Assign seats to customers
             cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << sellerName << '_' << currentCustomer.getCID() << " HAS ARRIVED." << endl;
             stillHasSeat = assignSeats(sellerName, currentCustomer);
@@ -188,7 +191,7 @@ void *eachSeller(void *sellerId) {
             }
 
             // Unlock the table since this seller already book the seat for the customer
-            pthread_mutex_unlock(&mutex);
+            pthread_mutex_unlock(&seatMutex);
             
             //keep working for the customer with complete time 
             currentTimeStamp = currentTimeStamp + currentCustomer.getCT(); 
@@ -202,6 +205,11 @@ void *eachSeller(void *sellerId) {
     return NULL;
 }
 
+void wakeup_all_seller_threads() {
+    pthread_mutex_lock(&mutex);
+    pthread_cond_broadcast(&cond); // wakeup all threads
+    pthread_mutex_unlock(&mutex);
+}
 
 /* where arg N is the command line option for # of customers per queue */
 int main() {
@@ -219,6 +227,8 @@ int main() {
         pthread_create(&threads[i], NULL, eachSeller,  reinterpret_cast<void*>(sellerId));
     }
 
+    wakeup_all_seller_threads();
+    
     for (int i = 0; i < numberOfSellers; i++) {
         pthread_join(threads[i], NULL);
     }

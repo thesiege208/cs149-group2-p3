@@ -173,9 +173,9 @@ void *eachSeller(void *sellerId) {
             currentTimeStamp += waitTime; // get the complete time stamp
             sleep(waitTime);
         } else {
-            // This customer has already arrived, lock the seat and assign to this customer
+            // This customer has already arrived
             pthread_mutex_lock(&mutex);
-            // Assign seats to customers
+            // Assign seat to customer
             cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << sellerName << '_' << currentCustomer.getCID() << " HAS ARRIVED." << endl;
             stillHasSeat = assignSeats(sellerName, currentCustomer);
             if (stillHasSeat == false) {
@@ -186,10 +186,9 @@ void *eachSeller(void *sellerId) {
                 currentTimeStamp = 100;
                 break;
             }
-
             // Unlock the table since this seller already book the seat for the customer
             pthread_mutex_unlock(&mutex);
-            
+
             //keep working for the customer with complete time 
             currentTimeStamp = currentTimeStamp + currentCustomer.getCT(); 
             cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << "SEAT BOOKED BY " << sellerName << "_" << currentCustomer.getCID() << "." << endl;

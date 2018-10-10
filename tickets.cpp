@@ -48,7 +48,6 @@ int N; /* command line input deciding # customers per queue */
 
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;            // main wakeup condition
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;          // main mutex
-pthread_mutex_t seatMutex = PTHREAD_MUTEX_INITIALIZER;      // would be necessary if sellers have different # of buyers
 
 bool assignLowSeat(string seatId) {
     for (int i = 0; i < 10; i++){
@@ -244,7 +243,6 @@ int main() {
     }
     
     pthread_mutex_destroy(&mutex);
-    pthread_mutex_destroy(&seatMutex);
     pthread_cond_destroy(&cond);
     
     printTable();

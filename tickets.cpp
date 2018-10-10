@@ -96,6 +96,8 @@ bool assignHighSeat(string seatId) {
 bool assignSeats(string seller, Customer customer) {
     char sellerType = seller[0];
     string assignedSeatId = seller  + '_' + to_string(customer.getCID());
+    pthread_mutex_lock(&seatMutex);         // lock the seat and assign to this customer
+    pthread_cond_wait(&cond, &seatMutex);   // wait for wakeup cond broadcast
     if (sellerType == 'L') {
         return assignLowSeat(assignedSeatId);
     } else if (sellerType == 'M') {
@@ -103,6 +105,8 @@ bool assignSeats(string seller, Customer customer) {
     } else { // High level
         return assignHighSeat(assignedSeatId);
     }
+    // Unlock the table since this seller already book the seat for the customer
+    pthread_mutex_unlock(&seatMutex);
 }
 
 void printTable() {
@@ -175,9 +179,8 @@ void *eachSeller(void *sellerId) {
             currentTimeStamp += waitTime; // get the complete time stamp
             sleep(waitTime);
         } else {
-            // This customer has already arrived, lock the seat and assign to this customer
-            pthread_mutex_lock(&seatMutex);
-            pthread_cond_wait(&cond, &seatMutex);   // wait for wakeup cond broadcast
+            // This customer has already arrived, 
+            
             // Assign seats to customers
             cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << sellerName << '_' << currentCustomer.getCID() << " HAS ARRIVED." << endl;
             stillHasSeat = assignSeats(sellerName, currentCustomer);
@@ -189,9 +192,6 @@ void *eachSeller(void *sellerId) {
                 currentTimeStamp = 100;
                 break;
             }
-
-            // Unlock the table since this seller already book the seat for the customer
-            pthread_mutex_unlock(&seatMutex);
             
             //keep working for the customer with complete time 
             currentTimeStamp = currentTimeStamp + currentCustomer.getCT(); 
@@ -232,6 +232,10 @@ int main() {
     for (int i = 0; i < numberOfSellers; i++) {
         pthread_join(threads[i], NULL);
     }
+    
+    pthread_mutex_destroy(&mutex);
+    pthread_mutex_destroy(&seatMutex);
+    pthread_cond_destroy(&cond);
     
     printTable();
     exit(0);

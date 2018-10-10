@@ -108,7 +108,7 @@ bool assignSeats(string seller, Customer customer) {
     } else if (sellerType == 'M') {
         pthread_mutex_lock(&midMutex);
         assigned = assignMiddleSeat(assignedSeatId);
-        pthread_mutex_lock(&midMutex);
+        pthread_mutex_unlock(&midMutex);
         return assigned;
     } else { // High level
         return assignHighSeat(assignedSeatId);

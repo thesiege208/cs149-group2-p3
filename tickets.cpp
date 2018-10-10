@@ -224,7 +224,9 @@ int main() {
     for (int i = 0; i < numberOfSellers; i++) {
         pthread_join(threads[i], NULL);
     }
-    
+
+    pthread_mutex_destroy(&mutex);
+
     printTable();
     exit(0);
 }

@@ -216,6 +216,8 @@ int main() {
     cout << "\nEnter the number of customers per queue (5, 10, or 15): ";
     cin >> N;
     cout << "\n";
+    
+    pthread_mutex_init(&mutex, NULL);
 
     for (int i = 0; i < numberOfSellers; i++) {
         int sellerId = i;

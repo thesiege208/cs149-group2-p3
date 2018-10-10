@@ -51,7 +51,6 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;          // main mutex
 pthread_mutex_t seatMutex = PTHREAD_MUTEX_INITIALIZER;      // would be necessary if sellers have different # of buyers
 
 bool assignLowSeat(string seatId) {
-    pthread_mutex_lock(&seatMutex);         // lock the seat and assign to this customer
     for (int i = 0; i < 10; i++){
             for (int j = 0; j < 10; j++){
                 if ( seat[i][j] == "" ) {
@@ -60,13 +59,11 @@ bool assignLowSeat(string seatId) {
                 }
             }
         }
-    pthread_mutex_unlock(&seatMutex);       // Unlock the table since this seller already book the seat for the customer
     return false;
 }
 
 bool assignMiddleSeat(string seatId) {
     int middleRow = 4;
-    pthread_mutex_lock(&seatMutex);         // lock the seat and assign to this customer
     for (int rowOffSet = 0; middleRow + rowOffSet >= 0 && middleRow + rowOffSet < 10; rowOffSet += 1) {
             for (int k = -1; k < 2; k += 2) {
                 int i = middleRow + k * rowOffSet;
@@ -78,12 +75,10 @@ bool assignMiddleSeat(string seatId) {
                 }
             }
         }
-    pthread_mutex_unlock(&seatMutex);       // Unlock the table since this seller already book the seat for the customer
     return false; 
 }
 
 bool assignHighSeat(string seatId) {
-    pthread_mutex_lock(&seatMutex);         // lock the seat and assign to this customer
     for (int i = 9; i >= 0; i--){
             for (int j = 0; j < 10; j++){
                 if ( seat[i][j] == "" ) {
@@ -92,7 +87,6 @@ bool assignHighSeat(string seatId) {
                 }
             }
         }
-    pthread_mutex_unlock(&seatMutex);       // Unlock the table since this seller already book the seat for the customer
     return false;
 }
 
@@ -102,9 +96,6 @@ bool assignHighSeat(string seatId) {
 bool assignSeats(string seller, Customer customer) {
     char sellerType = seller[0];
     string assignedSeatId = seller  + '_' + to_string(customer.getCID());
-    pthread_mutex_lock(&mutex);         
-    pthread_cond_wait(&cond, &mutex);   // wait for wakeup cond broadcast
-    pthread_mutex_unlock(&mutex);
     if (sellerType == 'L') {
         return assignLowSeat(assignedSeatId);
     } else if (sellerType == 'M') {
@@ -185,7 +176,7 @@ void *eachSeller(void *sellerId) {
             sleep(waitTime);
         } else {
             // This customer has already arrived, 
-            
+            pthread_mutex_lock(&mutex);
             // Assign seats to customers
             cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << sellerName << '_' << currentCustomer.getCID() << " HAS ARRIVED." << endl;
             stillHasSeat = assignSeats(sellerName, currentCustomer);
@@ -197,7 +188,7 @@ void *eachSeller(void *sellerId) {
                 currentTimeStamp = 100;
                 break;
             }
-            
+            pthread_mutex_unlock(&mutex);
             //keep working for the customer with complete time 
             currentTimeStamp = currentTimeStamp + currentCustomer.getCT(); 
             cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << "SEAT BOOKED BY " << sellerName << "_" << currentCustomer.getCID() << "." << endl;
@@ -232,7 +223,7 @@ int main() {
         pthread_create(&threads[i], NULL, eachSeller,  reinterpret_cast<void*>(sellerId));
     }
 
-    wakeup_all_seller_threads();
+    //wakeup_all_seller_threads();
     
     for (int i = 0; i < numberOfSellers; i++) {
         pthread_join(threads[i], NULL);

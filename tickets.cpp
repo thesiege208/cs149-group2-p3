@@ -136,7 +136,6 @@ string mapSellerIdToName(long sellerId) {
 priority_queue<Customer, vector<Customer>, Compare> generateRandomCustomerQueue(string sellerName) {
     priority_queue<Customer, vector<Customer>, Compare> customerQueue;
     char sellerType = sellerName[0];
-    time_t seed;
     for (int i = 0; i < N; i++) {
         int a = rand() % 59;
         int min;
@@ -209,7 +208,7 @@ void *eachSeller(void *sellerId) {
 /* where arg N is the command line option for # of customers per queue */
 int main() {
     srand((unsigned) time(&seed));
-    //srand(time(&seed));   // it worked on my end. idk why it doesnt for you
+    //srand(time(&seed));   // both methods work for me
     pthread_t threads[numberOfSellers];
     
     // prompting command line input

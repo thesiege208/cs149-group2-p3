@@ -197,7 +197,6 @@ void *eachSeller(void *sellerId) {
             // Unlock the table since this seller already book the seat for the customer
             pthread_mutex_unlock(&mutex);            
             // keep working for the customer with complete time 
->>>>>>> parent of 9683e5b... reverted to previous working commit without mutexes/cond
             currentTimeStamp = currentTimeStamp + currentCustomer.getCT(); 
             cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << "SEAT BOOKED BY " << sellerName << "_" << currentCustomer.getCID() << "." << endl;
             cQ.pop(); // remove customer who complete purchase

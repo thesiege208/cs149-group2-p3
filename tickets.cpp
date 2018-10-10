@@ -14,6 +14,7 @@
 #include <map>
 #include <pthread.h>
 #include <unistd.h>
+#include <time.h>
 
 using namespace std;
 
@@ -46,6 +47,7 @@ class Compare {
 
 string seat[10][10]; /* 2D array containing all 100 seats */
 int N; /* command line input deciding # customers per queue */
+//time_t seed;
 
 pthread_mutex_t mutex;
 
@@ -135,7 +137,6 @@ priority_queue<Customer, vector<Customer>, Compare> generateRandomCustomerQueue(
     priority_queue<Customer, vector<Customer>, Compare> customerQueue;
     char sellerType = sellerName[0];
     time_t seed;
-    srand((unsigned) time(&seed));
     for (int i = 0; i < N; i++) {
         int a = rand() % 59;
         int min;
@@ -207,6 +208,8 @@ void *eachSeller(void *sellerId) {
 
 /* where arg N is the command line option for # of customers per queue */
 int main() {
+    srand((unsigned) time(&seed));
+    //srand(time(&seed));   // it worked on my end. idk why it doesnt for you
     pthread_t threads[numberOfSellers];
     
     // prompting command line input

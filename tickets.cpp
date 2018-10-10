@@ -8,6 +8,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cstdlib>
+#include <ctime>
 #include <queue>
 #include <string>
 #include <map>
@@ -133,7 +134,8 @@ string mapSellerIdToName(long sellerId) {
 priority_queue<Customer, vector<Customer>, Compare> generateRandomCustomerQueue(string sellerName) {
     priority_queue<Customer, vector<Customer>, Compare> customerQueue;
     char sellerType = sellerName[0];
-    srand((unsigned) time(0));
+    time_t seed;
+    srand((unsigned) time(&seed));
     for (int i = 0; i < N; i++) {
         int a = rand() % 59;
         int min;

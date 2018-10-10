@@ -49,6 +49,7 @@ int N; /* command line input deciding # customers per queue */
 pthread_mutex_t mutex;
 
 bool assignLowSeat(string seatId) {
+    pthread_mutex_lock(&seatMutex);         // lock the seat and assign to this customer
     for (int i = 0; i < 10; i++){
             for (int j = 0; j < 10; j++){
                 if ( seat[i][j] == "" ) {
@@ -57,11 +58,13 @@ bool assignLowSeat(string seatId) {
                 }
             }
         }
+    pthread_mutex_unlock(&seatMutex);       // Unlock the table since this seller already book the seat for the customer
     return false;
 }
 
 bool assignMiddleSeat(string seatId) {
     int middleRow = 4;
+    pthread_mutex_lock(&seatMutex);         // lock the seat and assign to this customer
     for (int rowOffSet = 0; middleRow + rowOffSet >= 0 && middleRow + rowOffSet < 10; rowOffSet += 1) {
             for (int k = -1; k < 2; k += 2) {
                 int i = middleRow + k * rowOffSet;
@@ -73,10 +76,12 @@ bool assignMiddleSeat(string seatId) {
                 }
             }
         }
+    pthread_mutex_unlock(&seatMutex);       // Unlock the table since this seller already book the seat for the customer
     return false; 
 }
 
 bool assignHighSeat(string seatId) {
+    pthread_mutex_lock(&seatMutex);         // lock the seat and assign to this customer
     for (int i = 9; i >= 0; i--){
             for (int j = 0; j < 10; j++){
                 if ( seat[i][j] == "" ) {
@@ -85,6 +90,7 @@ bool assignHighSeat(string seatId) {
                 }
             }
         }
+    pthread_mutex_unlock(&seatMutex);       // Unlock the table since this seller already book the seat for the customer
     return false;
 }
 
@@ -94,6 +100,9 @@ bool assignHighSeat(string seatId) {
 bool assignSeats(string seller, Customer customer) {
     char sellerType = seller[0];
     string assignedSeatId = seller  + '_' + to_string(customer.getCID());
+    pthread_mutex_lock(&mutex);         
+    pthread_cond_wait(&cond, &mutex);   // wait for wakeup cond broadcast
+    pthread_mutex_unlock(&mutex);
     if (sellerType == 'L') {
         return assignLowSeat(assignedSeatId);
     } else if (sellerType == 'M') {
@@ -188,7 +197,6 @@ void *eachSeller(void *sellerId) {
             }
             // Unlock the table since this seller already book the seat for the customer
             pthread_mutex_unlock(&mutex);
-
             //keep working for the customer with complete time 
             currentTimeStamp = currentTimeStamp + currentCustomer.getCT(); 
             cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << "SEAT BOOKED BY " << sellerName << "_" << currentCustomer.getCID() << "." << endl;

@@ -46,7 +46,7 @@ class Compare {
 string seat[10][10]; /* 2D array containing all 100 seats */
 int N; /* command line input deciding # customers per queue */
 
-pthread_cond_t cond = PTHREAD_MUTEX_INITIALIZER;            // main wakeup condition
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;            // main wakeup condition
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;          // main mutex
 pthread_mutex_t seatMutex = PTHREAD_MUTEX_INITIALIZER;      // would be necessary if sellers have different # of buyers
 

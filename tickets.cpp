@@ -46,9 +46,10 @@ class Compare {
 string seat[10][10]; /* 2D array containing all 100 seats */
 int N; /* command line input deciding # customers per queue */
 
-pthread_cond_t cond = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t seatMutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t cond = PTHREAD_MUTEX_INITIALIZER;            // main wakeup condition
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;          // main mutex. not much significance, I dont think
+pthread_mutex_t lowMutex = PTHREAD_MUTEX_INITIALIZER;       // mutexes for low and mid sellers
+pthread_mutex_t midMutex = PTHREAD_MUTEX_INITIALIZER;       // dont need one for High, since only one seller
 
 bool assignLowSeat(string seatId) {
     for (int i = 0; i < 10; i++){
@@ -96,17 +97,24 @@ bool assignHighSeat(string seatId) {
 bool assignSeats(string seller, Customer customer) {
     char sellerType = seller[0];
     string assignedSeatId = seller  + '_' + to_string(customer.getCID());
-    pthread_mutex_lock(&seatMutex);         // lock the seat and assign to this customer
-    pthread_cond_wait(&cond, &seatMutex);   // wait for wakeup cond broadcast
+    bool assigned; 
+    pthread_mutex_lock(&mutex);         // lock the seat and assign to this customer
+    pthread_cond_wait(&cond, &mutex);   // wait for wakeup cond broadcast
     if (sellerType == 'L') {
-        return assignLowSeat(assignedSeatId);
+        pthread_mutex_lock(&lowMutex);
+        assigned = assignLowSeat(assignedSeatId);
+        pthread_mutex_unlock(&lowMutex);
+        return assigned;
     } else if (sellerType == 'M') {
-        return assignMiddleSeat(assignedSeatId);
+        pthread_mutex_lock(&midMutex);
+        assigned = assignMiddleSeat(assignedSeatId);
+        pthread_mutex_lock(&midMutex);
+        return assigned;
     } else { // High level
         return assignHighSeat(assignedSeatId);
     }
     // Unlock the table since this seller already book the seat for the customer
-    pthread_mutex_unlock(&seatMutex);
+    pthread_mutex_unlock(&mutex);
 }
 
 void printTable() {

@@ -47,11 +47,13 @@ string seat[10][10]; /* 2D array containing all 100 seats */
 int N; /* command line input deciding # customers per queue */
 
 pthread_cond_t cond = PTHREAD_MUTEX_INITIALIZER;            // main wakeup condition
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;          // main mutex. not much significance, I dont think
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;          // main mutex
+pthread_mutex_t seatMutex = PTHREAD_MUTEX_INITIALIZER;      // would be necessary if sellers have different # of buyers
 pthread_mutex_t lowMutex = PTHREAD_MUTEX_INITIALIZER;       // mutexes for low and mid sellers
 pthread_mutex_t midMutex = PTHREAD_MUTEX_INITIALIZER;       // dont need one for High, since only one seller
 
 bool assignLowSeat(string seatId) {
+    pthread_mutex_lock(&seatMutex);
     for (int i = 0; i < 10; i++){
             for (int j = 0; j < 10; j++){
                 if ( seat[i][j] == "" ) {
@@ -60,11 +62,13 @@ bool assignLowSeat(string seatId) {
                 }
             }
         }
+    pthread_mutex_unlock(&seatMutex);
     return false;
 }
 
 bool assignMiddleSeat(string seatId) {
     int middleRow = 4;
+    pthread_mutex_lock(&seatMutex);
     for (int rowOffSet = 0; middleRow + rowOffSet >= 0 && middleRow + rowOffSet < 10; rowOffSet += 1) {
             for (int k = -1; k < 2; k += 2) {
                 int i = middleRow + k * rowOffSet;
@@ -76,10 +80,12 @@ bool assignMiddleSeat(string seatId) {
                 }
             }
         }
+    pthread_mutex_unlock(&seatMutex);
     return false; 
 }
 
 bool assignHighSeat(string seatId) {
+    pthread_mutex_lock(&seatMutex);
     for (int i = 9; i >= 0; i--){
             for (int j = 0; j < 10; j++){
                 if ( seat[i][j] == "" ) {
@@ -88,6 +94,7 @@ bool assignHighSeat(string seatId) {
                 }
             }
         }
+    pthread_mutex_unlock(&seatMutex);
     return false;
 }
 
@@ -243,6 +250,8 @@ int main() {
     
     pthread_mutex_destroy(&mutex);
     pthread_mutex_destroy(&seatMutex);
+    pthread_mutex_destroy(&lowMutex);
+    pthread_mutex_destroy(&midMutex);
     pthread_cond_destroy(&cond);
     
     printTable();

@@ -61,8 +61,8 @@ bool assignLowSeat(string seatId) {
 }
 
 bool assignMiddleSeat(string seatId) {
-    int middleRow = 5;
-    for (int rowOffSet = 0; middleRow - rowOffSet >= 0 && middleRow + rowOffSet < 10; rowOffSet += 1) {
+    int middleRow = 4;
+    for (int rowOffSet = 0; middleRow + rowOffSet >= 0 && middleRow + rowOffSet < 10; rowOffSet += 1) {
             for (int k = -1; k < 2; k += 2) {
                 int i = middleRow + k * rowOffSet;
                 for (int j = 0; j < 10; j++){

@@ -64,8 +64,8 @@ bool assignLowSeat(string seatId) {
 
 bool assignMiddleSeat(string seatId) {
     int middleRow = 4;
-    for (int rowOffSet = 0; middleRow - rowOffSet >= 0 && middleRow + rowOffSet < 10; rowOffSet++) {
-        int k = -1;
+    int k = -1;
+    for (int rowOffSet = 0; middleRow + rowOffSet < 17; rowOffSet++) { // last row processed, mid=0, off=9, i = 9, row 10
         int i = middleRow + k * rowOffSet;
         for (int j = 0; j < 10; j++){
             if ( seat[i][j] == "" ) {
@@ -73,6 +73,7 @@ bool assignMiddleSeat(string seatId) {
                 return true;
             }
         }
+        middleRow = i;
         k *= -1;
     }
     return false;

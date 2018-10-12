@@ -46,6 +46,7 @@ public:
 
 string seat[10][10]; /* 2D array containing all 100 seats */
 int N; /* command line input deciding # customers per queue */
+int tAway = 0; // turned away customers
 
 pthread_mutex_t mutex;
 
@@ -185,6 +186,7 @@ void *eachSeller(void *sellerId) {
                 cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << "SEATS ARE FULL." << endl;
                 cQ.pop();
                 cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << sellerName << "_" << currentCustomer.getCID() << " HAS LEFT.\n" << endl;
+                tAway++; // increment turned away buyers by 1
                 break;
             }
             
@@ -193,11 +195,15 @@ void *eachSeller(void *sellerId) {
             
             //keep working for the customer with complete time
             currentTimeStamp = currentTimeStamp + currentCustomer.getCT();
-            cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << "SEAT BOOKED BY " << sellerName << "_" << currentCustomer.getCID() << "." << endl;
+            cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << "SEAT BOOKED BY " << sellerName << "." << endl;
             cQ.pop(); // remove customer who complete purchase
             cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << sellerName << "_" << currentCustomer.getCID() << " HAS LEFT.\n" << endl;
             sleep(currentCustomer.getCT()); // actually completing
+            printTable(); // print table after each ticket sell
         }
+    }
+    if (!cQ.empty()) {
+        tAway += cQ.size(); // add rest of unprocessed buyers
     }
     pthread_cancel(pthread_self());
     return NULL;
@@ -224,5 +230,6 @@ int main() {
     }
     
     printTable();
+    cout << "\n" << tAway << " BUYERS TURNED AWAY." << endl;
     exit(0);
 }

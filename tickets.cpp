@@ -36,6 +36,7 @@ public:
 };
 
 class Compare {
+
 public:
     bool operator() (Customer a, Customer b) {
         if (a.getAT() > b.getAT()) { return true;}
@@ -62,16 +63,16 @@ bool assignLowSeat(string seatId) {
 
 bool assignMiddleSeat(string seatId) {
     int middleRow = 4;
-    for (int rowOffSet = 0; middleRow - rowOffSet >= 0 && middleRow + rowOffSet < 10; rowOffSet += 1) {
-        for (int k = 1; k >= -1; k -= 2) {
-            int i = middleRow + k * rowOffSet;
-            for (int j = 0; j < 10; j++){
-                if ( seat[i][j] == "" ) {
-                    seat[i][j] = seatId;
-                    return true;
-                }
+    for (int rowOffSet = 0; middleRow - rowOffSet >= 0 && middleRow + rowOffSet < 10; rowOffSet++) {
+        int k = -1;
+        int i = middleRow + k * rowOffSet;
+        for (int j = 0; j < 10; j++){
+            if ( seat[i][j] == "" ) {
+                seat[i][j] = seatId;
+                return true;
             }
         }
+        k *= -1;
     }
     return false;
 }
@@ -184,7 +185,6 @@ void *eachSeller(void *sellerId) {
                 cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << "SEATS ARE FULL." << endl;
                 cQ.pop();
                 cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << sellerName << "_" << currentCustomer.getCID() << " HAS LEFT.\n" << endl;
-                currentTimeStamp = 100;
                 break;
             }
             

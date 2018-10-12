@@ -134,7 +134,7 @@ string mapSellerIdToName(long sellerId) {
 priority_queue<Customer, vector<Customer>, Compare> generateRandomCustomerQueue(string sellerName) {
     priority_queue<Customer, vector<Customer>, Compare> customerQueue;
     char sellerType = sellerName[0];
-    srand((unsigned) time(0));
+    
     for (int i = 0; i < N; i++) {
         int a = rand() % 59;
         int min;
@@ -207,7 +207,7 @@ void *eachSeller(void *sellerId) {
 /* where arg N is the command line option for # of customers per queue */
 int main() {
     pthread_t threads[numberOfSellers];
-    
+    srand((unsigned) time(0));
     // prompting command line input
     cout << "\nEnter the number of customers per queue (5, 10, or 15): ";
     cin >> N;

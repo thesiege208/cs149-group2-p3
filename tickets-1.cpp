@@ -48,6 +48,9 @@ string seat[10][10]; /* 2D array containing all 100 seats */
 int N; /* command line input deciding # customers per queue */
 int tAway = 0; // turned away customers
 int counter = 0; // counter for how many threads initialized
+int lowC = 0; // low pri seat count
+int midC = 0; // mid pri seat count
+int highC = 0; // high pri seat count
 
 pthread_mutex_t mutex;
 pthread_cond_t cond;
@@ -57,6 +60,7 @@ bool assignLowSeat(string seatId) {
         for (int j = 0; j < 10; j++){
             if ( seat[i][j] == "" ) {
                 seat[i][j] = seatId;
+                lowC++;
                 return true;
             }
         }
@@ -72,6 +76,7 @@ bool assignMiddleSeat(string seatId) {
         for (int j = 0; j < 10; j++){
             if ( seat[i][j] == "" ) {
                 seat[i][j] = seatId;
+                midC++;
                 return true;
             }
         }
@@ -86,6 +91,7 @@ bool assignHighSeat(string seatId) {
         for (int j = 0; j < 10; j++){
             if ( seat[i][j] == "" ) {
                 seat[i][j] = seatId;
+                highC++;
                 return true;
             }
         }
@@ -236,5 +242,8 @@ int main() {
     
     printTable();
     cout << "\n" << tAway << " BUYERS TURNED AWAY." << endl;
+    cout << "\nHigh Priced Seats Sold: " << highC << endl;
+    cout << "\nMiddle Priced Seats Sold: " << midC << endl;
+    cout << "\nLow Priced Seats Sold: " << lowC << endl;
     exit(0);
 }

@@ -184,15 +184,13 @@ void *eachSeller(void *sellerId) {
             if (counter == numberOfSellers) { pthread_cond_broadcast(&cond); } // once all threads ready, broadcast to the waiting threads
             else { pthread_cond_wait(&cond, &mutex); } // if not all threads ready, wait until broadcast
             // Assign seats to customers
-            cout << "\n@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << sellerName << '_' << currentCustomer.getCID() << " HAS ARRIVED." << endl;
+            cout << "\n@0:" << setfill('0') << setw(2) << currentTimeStamp << " BUYER " << sellerName << '_' << currentCustomer.getCID() << " HAS ARRIVED." << endl;
             stillHasSeat = assignSeats(sellerName, currentCustomer);
             if (stillHasSeat == false) {
                 // No more empty seats
                 pthread_mutex_unlock(&mutex);
-                cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << "SEATS ARE FULL." << endl;
-                cQ.pop();
-                cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << sellerName << "_" << currentCustomer.getCID() << " HAS LEFT.\n" << endl;
-                tAway++; // increment turned away buyers by 1
+                cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " SEATS ARE FULL. WINDOWS CLOSED." << endl;
+                cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " BUYER " << sellerName << "_" << currentCustomer.getCID() << " HAS LEFT.\n" << endl;
                 break;
             }
             
@@ -201,9 +199,9 @@ void *eachSeller(void *sellerId) {
             
             //keep working for the customer with complete time
             currentTimeStamp = currentTimeStamp + currentCustomer.getCT();
-            cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << "SEAT BOOKED BY " << sellerName << "." << endl;
+            cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " SEAT BOOKED BY SELLER" << sellerName << "." << endl;
             cQ.pop(); // remove customer who complete purchase
-            cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << sellerName << "_" << currentCustomer.getCID() << " HAS LEFT.\n" << endl;
+            cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " BUYER " << sellerName << "_" << currentCustomer.getCID() << " HAS LEFT.\n" << endl;
             printTable(); // print table after each ticket sell
             sleep(currentCustomer.getCT()); // actually completing
         }

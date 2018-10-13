@@ -181,14 +181,14 @@ void *eachSeller(void *sellerId) {
         } else {
             // This customer has already arrived, lock the seat and assign to this customer
             pthread_mutex_lock(&mutex);
+            if (counter == numberOfSellers) { pthread_cond_broadcast(&cond); } // once all threads ready, broadcast to the waiting threads
+            else { pthread_cond_wait(&cond, &mutex); } // if not all threads ready, wait until broadcast
             // Assign seats to customers
             cout << "\n@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << sellerName << '_' << currentCustomer.getCID() << " HAS ARRIVED." << endl;
             stillHasSeat = assignSeats(sellerName, currentCustomer);
             if (stillHasSeat == false) {
                 // No more empty seats
                 pthread_mutex_unlock(&mutex);
-                if (counter == numberOfSellers) { pthread_cond_broadcast(&cond); } // once all threads ready, broadcast to the waiting threads
-                else { pthread_cond_wait(&cond, &mutex); } // if not all threads ready, wait until broadcast
                 cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << "SEATS ARE FULL." << endl;
                 cQ.pop();
                 cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << sellerName << "_" << currentCustomer.getCID() << " HAS LEFT.\n" << endl;

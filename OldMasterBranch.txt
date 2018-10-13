@@ -1,3 +1,12 @@
 I pulled the branch, thinking it would do an outer-join kinda thing. I didnt realize it would do an inner-join.
 So I reverted the pull, and now a copy of the old master branch is in a new branch called "revert-1-patch-2"
 Sorry about that.
+
+List of what I changed in the code:
+1. Moved SRAND back to main function for better random times
+2. Fixed the midSeller function. 
+  It went row 5 4 3 
+  Now goes row 5 6 4 7 3 8 2 9 1 10
+3. Added the broadcast so now all threads sell at the same time. 
+  They still initialize on their own. Only the actual sell calls have to wait.
+4. Added an extra printTable after each sold seat, as instructed by the requirements

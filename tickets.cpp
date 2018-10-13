@@ -204,8 +204,8 @@ void *eachSeller(void *sellerId) {
             cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << "SEAT BOOKED BY " << sellerName << "." << endl;
             cQ.pop(); // remove customer who complete purchase
             cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << sellerName << "_" << currentCustomer.getCID() << " HAS LEFT.\n" << endl;
-            sleep(currentCustomer.getCT()); // actually completing
             printTable(); // print table after each ticket sell
+            sleep(currentCustomer.getCT()); // actually completing
         }
     }
     if (!cQ.empty()) {

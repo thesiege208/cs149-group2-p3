@@ -47,8 +47,10 @@ public:
 string seat[10][10]; /* 2D array containing all 100 seats */
 int N; /* command line input deciding # customers per queue */
 int tAway = 0; // turned away customers
+int counter = 0; // counter for how many threads initialized
 
 pthread_mutex_t mutex;
+pthread_cond_t cond;
 
 bool assignLowSeat(string seatId) {
     for (int i = 9; i >= 0; i--){
@@ -159,6 +161,7 @@ priority_queue<Customer, vector<Customer>, Compare> generateRandomCustomerQueue(
 }
 
 void *eachSeller(void *sellerId) {
+    counter ++;
     string sellerName = mapSellerIdToName((long) sellerId);
     
     // Generate random customer queue for this seller.
@@ -184,6 +187,8 @@ void *eachSeller(void *sellerId) {
             if (stillHasSeat == false) {
                 // No more empty seats
                 pthread_mutex_unlock(&mutex);
+                if (counter == numberOfSellers) { pthread_cond_broadcast(&cond); } // once all threads ready, broadcast to the waiting threads
+                else { pthread_cond_wait(&cond, &mutex); } // if not all threads ready, wait until broadcast
                 cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << "SEATS ARE FULL." << endl;
                 cQ.pop();
                 cout << "@0:" << setfill('0') << setw(2) << currentTimeStamp << " " << sellerName << "_" << currentCustomer.getCID() << " HAS LEFT.\n" << endl;
@@ -220,6 +225,7 @@ int main() {
     cin >> N;
     
     pthread_mutex_init(&mutex, NULL);
+    pthread_cond_init(&cond, NULL);
     
     for (int i = 0; i < numberOfSellers; i++) {
         int sellerId = i;
